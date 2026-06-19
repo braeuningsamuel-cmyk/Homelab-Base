@@ -290,7 +290,7 @@ async def cmd_ask(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🤔 Denke nach...")
     litellm_url = os.getenv("LITELLM_URL", "http://127.0.0.1:4000")
     litellm_key = os.getenv("LITELLM_API_KEY", "sk-bootstreep")
-    model = os.getenv("LITELLM_MODEL", "mistral")
+    model = os.getenv("LITELLM_MODEL", "gemma4")
     try:
         resp = requests.post(
             f"{litellm_url}/chat/completions",

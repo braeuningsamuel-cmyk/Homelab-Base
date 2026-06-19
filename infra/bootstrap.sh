@@ -455,9 +455,9 @@ section_8_ai() {
     if [ "$SKIP_MODEL_DOWNLOAD" != "true" ]; then
         for _ in $(seq 1 30); do docker exec ollama curl -fs http://localhost:11434/api/tags &>/dev/null && break; sleep 2; done
         if [ "$OLLAMA_MODELS" = "full" ]; then
-            MODELS="mistral:7b llama3.2:3b deepseek-coder:6.7b llama3.2:8b phi4:14b"
+            MODELS="gemma4:12b llama3.2:3b deepseek-coder:6.7b llama3.2:8b phi4:14b"
         else
-            MODELS="mistral:7b llama3.2:3b"
+            MODELS="gemma4:12b llama3.2:3b"
         fi
         for model in $MODELS; do
             docker exec ollama ollama list 2>/dev/null | grep -q "^${model%%:*}" && { log "$model vorhanden"; continue; }
