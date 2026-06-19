@@ -1,0 +1,57 @@
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+bootstrap.log
+
+# Secrets
+.env
+.env.local
+*.enc.env
+*.pem
+*.key
+*.p12
+secrets/
+.sops.yaml
+
+# Backups
+backups/
+*.tar.gz
+*.bak
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+.npm
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Generated
+.config/
+.cache/
+
+# Local config
+.env.production

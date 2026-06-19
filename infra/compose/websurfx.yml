@@ -1,0 +1,33 @@
+---
+# Websurfx – Privacy Meta-Search (nutzt Tor als Upstream)
+
+x-common: &common
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  networks: [backend]
+
+services:
+  websurfx:
+    <<: *common
+    image: websurfx:local
+    container_name: websurfx
+    ports:
+      - "8080:8080"
+    depends_on:
+      tor: {condition: service_healthy}
+    deploy:
+      resources:
+        limits: {memory: 256m, cpus: "0.5"}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "3"}
+
+networks:
+  backend:
+    external: true

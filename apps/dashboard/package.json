@@ -1,0 +1,30 @@
+{
+  "name": "bootstreep-dashboard",
+  "version": "2.6.1",
+  "description": "Bootstreep Homelab Server Dashboard - Tauri 2.x Desktop App",
+  "author": "Bootstreep",
+  "license": "MIT",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "build:debug": "tauri build --debug",
+    "preview": "tauri build --no-bundle",
+    "check": "cargo check --manifest-path src-tauri/Cargo.toml",
+    "clippy": "cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings",
+    "fmt": "cargo fmt --manifest-path src-tauri/Cargo.toml --all",
+    "icon": "tauri icon src-tauri/icons/icon.png"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "serve": "^14.2.6"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@10.9.8"
+}
+

@@ -1,0 +1,33 @@
+---
+# Uptime Kuma – Monitoring
+
+x-common: &common
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  networks: [backend]
+
+services:
+  uptime-kuma:
+    <<: *common
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    ports:
+      - "3001:3001"
+    volumes:
+      - uptime_kuma_data:/app/data
+    deploy:
+      resources:
+        limits: {memory: 256m, cpus: "0.5"}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  uptime_kuma_data:
+
+networks:
+  backend:
+    external: true

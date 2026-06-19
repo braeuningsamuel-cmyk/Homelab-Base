@@ -1,0 +1,83 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+*.kubeconfig
+
+# Logs and runtime data
+*.log
+logs/
+tmp/
+temp/
+*.pid
+*.seed
+*.sqlite
+*.sqlite3
+*.db
+
+# Node/Bun/frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.pnpm-store/
+.yarn/cache/
+.turbo/
+.next/
+.svelte-kit/
+dist/
+build/
+coverage/
+
+# Rust/Tauri
+target/
+**/src-tauri/target/
+*.rs.bk
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.python-version
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+htmlcov/
+
+# Docker and local volumes
+docker-compose.override.yml
+compose.override.yml
+volumes/
+data/
+
+# Generated archives and binaries
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.exe
+*.dll
+*.so
+*.dylib

@@ -1,0 +1,33 @@
+---
+# Tor SOCKS5-Proxy (nur lokal erreichbar – Privacy)
+
+x-common: &common
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  read_only: true
+  tmpfs: ["/tmp"]
+  networks: [backend]
+
+services:
+  tor:
+    <<: *common
+    image: peterdavehello/tor-socks-proxy:latest
+    container_name: tor
+    ports:
+      - "127.0.0.1:9050:9150"
+    deploy:
+      resources:
+        limits: {memory: 128m, cpus: "0.5"}
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9150"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "3"}
+
+networks:
+  backend:
+    external: true

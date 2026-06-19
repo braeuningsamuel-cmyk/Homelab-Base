@@ -1,0 +1,37 @@
+---
+# Prowlarr – Indexer-Manager
+
+x-common: &common
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  networks: [backend]
+
+services:
+  prowlarr:
+    <<: *common
+    image: lscr.io/linuxserver/prowlarr:1.21.2
+    container_name: prowlarr
+    ports:
+      - "9696:9696"
+    volumes:
+      - prowlarr_config:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TIMEZONE:-Europe/Berlin}
+    deploy:
+      resources:
+        limits: {memory: 256m, cpus: "0.5"}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9696/api/v1/system/status"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  prowlarr_config:
+
+networks:
+  backend:
+    external: true

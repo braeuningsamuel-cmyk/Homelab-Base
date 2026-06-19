@@ -1,0 +1,38 @@
+---
+# Heimdall – Dashboard für alle Services
+
+x-common: &common
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  networks: [frontend]
+
+services:
+  heimdall:
+    <<: *common
+    image: lscr.io/linuxserver/heimdall:2.5.9
+    container_name: heimdall
+    ports:
+      - "8090:80"
+      - "8091:443"
+    volumes:
+      - heimdall_config:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TIMEZONE:-Europe/Berlin}
+    deploy:
+      resources:
+        limits: {memory: 256m, cpus: "0.5"}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  heimdall_config:
+
+networks:
+  frontend:
+    external: true

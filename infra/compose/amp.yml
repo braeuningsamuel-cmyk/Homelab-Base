@@ -1,0 +1,38 @@
+---
+# AMP – Game-Server-Manager
+
+x-common: &common
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  networks: [backend]
+
+services:
+  amp:
+    <<: *common
+    image: ghcr.io/cubecoders/amp:2.5.1.6
+    container_name: amp
+    ports:
+      - "8087:8080"
+      - "8088:8088"
+    volumes:
+      - amp_data:/amp
+    environment:
+      - AMP_UID=1000
+      - AMP_GID=1000
+      - AMP_USER=admin
+    deploy:
+      resources:
+        limits: {memory: 2g, cpus: "2"}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  amp_data:
+
+networks:
+  backend:
+    external: true
