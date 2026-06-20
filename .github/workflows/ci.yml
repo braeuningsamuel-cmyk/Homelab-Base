@@ -1,0 +1,130 @@
+name: Monorepo Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  structure:
+    name: Structure & Quality Bar
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Validate required root files
+        run: |
+          echo "Checking required root files..."
+          test -f Makefile            && echo "OK  Makefile"            || { echo "MISS Makefile";            exit 1; }
+          test -f ARCHITECTURE.md     && echo "OK  ARCHITECTURE.md"     || { echo "MISS ARCHITECTURE.md";     exit 1; }
+          test -f .env.example        && echo "OK  .env.example"        || { echo "MISS .env.example";        exit 1; }
+          test -f README.md           && echo "OK  README.md"           || { echo "MISS README.md";           exit 1; }
+          test -f SECURITY.md         && echo "OK  SECURITY.md"         || { echo "MISS SECURITY.md";         exit 1; }
+
+      - name: Validate subdirectory structure
+        run: |
+          echo "Checking monorepo subdirectories..."
+          for dir in infra apps/dashboard apps/guardian profile docs; do
+            if [ -d "$dir" ]; then
+              echo "OK  $dir/ exists"
+            else
+              echo "MISS $dir/ missing"
+            fi
+          done
+
+      - name: Validate package.json files
+        run: |
+          echo "Validating package.json files in subdirectories..."
+          for pkg in apps/dashboard/package.json apps/guardian/package.json; do
+            if [ -f "$pkg" ]; then
+              node -e "
+                const p = require('./$pkg');
+                if (!p.name)        { console.error('FAIL  $pkg missing name');        process.exit(1); }
+                if (!p.version)     { console.error('FAIL  $pkg missing version');     process.exit(1); }
+                if (!p.scripts)     { console.error('FAIL  $pkg missing scripts');     process.exit(1); }
+                if (!p.scripts.build) { console.error('FAIL  $pkg missing build script'); process.exit(1); }
+                console.log('OK  $pkg name=' + p.name + ' version=' + p.version);
+              "
+            fi
+          done
+
+  yaml-json:
+    name: YAML / JSON Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Validate all YAML files
+        run: |
+          echo "Validating YAML syntax across the monorepo..."
+          find . -type f \( -name '*.yml' -o -name '*.yaml' \) \
+            -not -path './.git/*' \
+            -not -path '*/node_modules/*' \
+            -not -path '*/.output/*' \
+            -not -path '*/dist/*' \
+            | while read -r f; do
+              python3 -c "import yaml; list(yaml.safe_load_all(open(r'$f')))" 2>/dev/null \
+                && echo "OK  $f" \
+                || echo "FAIL $f"
+            done
+
+      - name: Validate all JSON files
+        run: |
+          echo "Validating JSON syntax across the monorepo..."
+          find . -type f -name '*.json' \
+            -not -path './.git/*' \
+            -not -path '*/node_modules/*' \
+            -not -path '*/.output/*' \
+            -not -path '*/dist/*' \
+            -not -path '*/bun.lock' \
+            | while read -r f; do
+              python3 -c "import json; json.load(open(r'$f'))" 2>/dev/null \
+                && echo "OK  $f" \
+                || echo "FAIL $f"
+            done
+
+  secrets:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Scan for hardcoded secrets
+        run: |
+          echo "Scanning for hardcoded secrets..."
+          if grep -rnE \
+            "(api[_-]?key|secret|password|token|passwd|pwd)[\"' ]*[:=][\"' ]*[A-Za-z0-9+/=_-]{16,}" \
+            --include='*.yml' --include='*.yaml' --include='*.json' --include='*.env' --include='*.sh' --include='*.py' --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' \
+            --exclude-dir='.git' \
+            --exclude-dir='node_modules' \
+            --exclude-dir='.output' \
+            --exclude-dir='dist' \
+            apps/ infra/ profile/ docs/ README.md 2>/dev/null; then
+            echo "FAIL  Potential secrets found above"
+            exit 1
+          else
+            echo "OK  No hardcoded secrets found"
+          fi
+
+      - name: Scan for committed .env files
+        run: |
+          echo "Checking for accidentally committed .env files..."
+          found=0
+          for f in $(find . -name '.env' -not -path './.git/*' 2>/dev/null); do
+            echo "FAIL  Committed .env found: $f"
+            found=1
+          done
+          if [ "$found" = "1" ]; then
+            exit 1
+          fi
+          echo "OK  No committed .env files"
